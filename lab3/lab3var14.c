@@ -54,7 +54,7 @@ int main()
             else if (y_check == fx_check)
                 printf("*");
             else if (y_check == (int)(a * 100 + 0.5) && (int)(x * 100 + 0.5) == -3)
-                printf("%d", (int)(a + 0.5)); /* заменить тут! */
+                printf("%.1f", a + 0.5);
             else if ((int)(x * 100 + 0.5) == 154 && y_check == -2)
                 printf("PI/2");
 			else if (y_check == 0)
@@ -91,7 +91,7 @@ int main()
                 else if (y_check == fx_check)
                     printf("*");
                 else if (y_check == (int)(-1 * a * 100 + 0.5) && (int)(x * 100 + 0.5) == -3)
-                    printf("%d", (int)(-1 * a + 0.5)); /* заменить тут! */
+                    printf("%.1f", -1 * a + 0.5);
                 else if ((int)(x * 100 + 0.5) == 154 && y_check == 2)
                     printf("PI/2");
                 else if (y_check == 0)
