@@ -54,7 +54,7 @@ int main()
             else if (y_check == fx_check)
                 printf("*");
             else if (y_check == (int)(a * 100 + 0.5) && (int)(x * 100 + 0.5) == -3)
-                printf("%.1f", a + 0.5);
+                printf("%.1f", a);
             else if ((int)(x * 100 + 0.5) == 154 && y_check == -2)
                 printf("PI/2");
 			else if (y_check == 0)
