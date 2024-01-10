@@ -13,7 +13,7 @@ int main() {
             fflush(stdin),
             scanf("%d", &size) != 1 || size < 2 || size > 20)
         printf("Ìàññèâ äîëæåí ñîäåðæàòü êàê ìèíèìóì äâà ýëåìåíòà, ëèáî âû ÷òî-òî íå òî ââåëè\n");
-    double arr[size], xx, ii;
+    double arr[20], xx, ii;
     printf("Ââåäèòå ýëåìåíòû ìàññèâà:\n");
     for (i = 0; i < size; i++) {
         while (printf("%d:", i + 1),
@@ -21,11 +21,11 @@ int main() {
                 scanf("%lf", &arr[i]) != 1)
             printf("Âû ÷òî-òî íå òî ââåëè!\n");
     }
-    
+
     for (i = 0; i < size; i++)	/* ñîðòèðîâêà ïî âîçðàñòàíèþ íåçàâèñèìî îò çíàêà */
     {
         for (x = i; x < size; x++)
-        {	
+        {
             if (arr[i] < 0 && arr[x] < 0)
             {
             	ii = -1 * arr[i];
@@ -36,7 +36,7 @@ int main() {
         		xx = -1 * arr[x];
         		ii = arr[i];
 			}
-        		
+
         	else if (arr[i] < 0)
         	{
         		ii = -1 * arr[i];
@@ -55,7 +55,7 @@ int main() {
             }
         }
     }
-    
+
     double ratio = arr[1] / arr[0];
     for (i = 2; i < size; i++) {
 		if (arr[i] / arr[i - 1] != ratio) {

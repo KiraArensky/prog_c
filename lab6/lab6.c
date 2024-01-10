@@ -73,7 +73,7 @@ int main() {
             fflush(stdin),
             scanf("%d", &size) != 1 || size < 2)
         printf("Ìàññèâ äîëæåí ñîäåðæàòü êàê ìèíèìóì äâà ýëåìåíòà, ëèáî âû ÷òî-òî íå òî ââåëè\n");
-    double arr[size];
+    double arr[20];
     input_array(arr, size); /* ââîä ìàññèâà */
     sort_array(arr, size); /* ñîðòèðîâêà ìàññèâà íåçàâèñèìî îò çíàêà */
     double ratio;

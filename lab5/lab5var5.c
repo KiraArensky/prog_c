@@ -21,7 +21,7 @@ int main() {
             scanf("%d", &cols) != 1 || cols <= 0 || cols > 15)
         printf("Âû ÷òî-òî íå òî ââåëè!\n");
 
-    double array[rows + 1][cols + 1];
+    double array[15][15];
     for (i = 0; i < rows; i++) {
         for (j = 0; j < cols; j++) {
             while (printf("Ââåäèòå ýëåìåíò array[%d][%d]: ", i, j),
