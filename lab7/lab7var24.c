@@ -2,14 +2,14 @@
 #include <stdlib.h>
 
 
-typedef struct Date
+typedef struct Date	/* тут */
 {
 	unsigned int d:5;
 	unsigned int m:4;
 	int y:13;
 } Date;
 
-typedef struct Condition
+typedef struct Condition	/* тут */
 {
 	unsigned int complited:1;
 	unsigned int paid:1;
@@ -25,7 +25,7 @@ typedef struct Orders
 	Condition condition;
 } Orders;
 
-void InputDate(Date *p) 
+void InputDate(Date *p)		/* тут */
 {
 	while (printf("\taddmision (dd.mm.yyyy): "),
 				fflush(stdin),
@@ -33,7 +33,7 @@ void InputDate(Date *p)
             printf("Wrong data! Pls, try again (example: 08.10.2021)\n");
 }
 
-void InputCondition(Condition *p) 
+void InputCondition(Condition *p)	/* тут */
 {
 	while (printf("\tcondition (1 - done or 0 - not, 1 - paid or 0 - not):"),
 				fflush(stdin),
@@ -108,10 +108,12 @@ void PrintOrdersArray(const Orders *a, int n)
 	}
 }
 
+/* тут */
 double SummPrice(const Orders *a, int n)
 {
-	
+	/* тут */
 }
+/* тут */
 
 int main()
 {
