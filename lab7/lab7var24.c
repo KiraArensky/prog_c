@@ -4,12 +4,15 @@
 
 typedef struct Date
 {
-	int d, m, y;
+	unsigned int d:5;
+	unsigned int m:4;
+	int y:13;
 } Date;
 
 typedef struct Condition
 {
-	int complited, paid;
+	unsigned int complited:1;
+	unsigned int paid:1;
 } Condition;
 
 
@@ -32,10 +35,10 @@ void InputDate(Date *p)
 
 void InputCondition(Condition *p) 
 {
-	while (printf("\tcondition (1 - done or 2 - not, 1 - paid or 2 - not):"),
+	while (printf("\tcondition (1 - done or 0 - not, 1 - paid or 0 - not):"),
 				fflush(stdin),
             	scanf("%d, %d", &p->complited, &p->paid) != 2)
-            printf("Error! Pls, try again (example: 1, 2)\n");
+            printf("Error! Pls, try again (example: 1, 0)\n");
 }
 
 void InputOrder(Orders * p)
@@ -64,9 +67,9 @@ void PrintCondition(const Condition *p)
 {	
 	if (p->complited == 1 && p->paid == 1)
 		printf("\tcondition: done, paid\n");
-	else if (p->complited == 1 && p->paid == 2)
+	else if (p->complited == 1 && p->paid == 0)
 		printf("\tcondition: done, not paid\n");
-	else if (p->complited == 2 && p->paid == 1)
+	else if (p->complited == 0 && p->paid == 1)
 		printf("\tcondition: not done, paid\n");
 	else
 		printf("\tcondition: not done, not paid\n");
@@ -103,6 +106,11 @@ void PrintOrdersArray(const Orders *a, int n)
 		PrintOrder(a + i);
 		printf("\n");
 	}
+}
+
+double SummPrice(const Orders *a, int n)
+{
+	
 }
 
 int main()
