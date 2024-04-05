@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 typedef struct Date
@@ -45,7 +46,7 @@ void InputCondition(Condition *p)
 	if (!p)
 		return;
 	int complited, paid;
-	while (printf("\tcondition (1 - done or 0 - not, 1 - paid or 0 - not):"),
+	while (printf("\tcondition (1 - done or 0 - not, 1 - paid or 0 - not): "),
 				fflush(stdin),
             	scanf("%d, %d", &complited, &paid) != 2 || !(complited >= 0 && complited <= 1) || !(paid >= 0 && paid <= 1))
             printf("Error! Pls, try again (example: 1, 0)\n");
@@ -63,11 +64,11 @@ void InputOrder(Orders * p)
 	InputDate(&p->addmision);
 	while (printf("\ttime (in minutes): "),
 				fflush(stdin),
-            	scanf("%d", &p->time) != 1)
+            	scanf("%lf", &p->time) != 1)
             printf("Error! Pls, try again (example: 60)\n");
 	while (printf("\tprice: "),
 				fflush(stdin),
-            	scanf("%d", &p->price) != 1)
+            	scanf("%lf", &p->price) != 1)
             printf("Error! Pls, try again (example: 999)\n");
 	InputCondition(&p->condition);
 }
@@ -100,8 +101,8 @@ void PrintOrder(const Orders * p)
 	printf("\tcompany name: %s\n", p->name_company);
 	printf("\taddmision: ");
 	PrintDate(&p->addmision);
-	printf("\ttime: %d minutes\n ", p->time);
-	printf("\tprice: %d$\n", p->price);
+	printf("\ttime: %.2lf minutes\n ", p->time);
+	printf("\tprice: %.2lf$\n", p->price);
 	PrintCondition(&p->condition);
 	printf("\n");
 }
@@ -123,8 +124,8 @@ void PrintOrdersArray(const Orders *a, int n)
 {
 	if (!a)
 		return;
-	int i = 0;
-	for (i; i < n; i++)
+	int i;
+	for (i = 0; i < n; i++)
 	{
 		printf("Order %d info:\n", i+1);
 		PrintOrder(a + i);
@@ -132,7 +133,7 @@ void PrintOrdersArray(const Orders *a, int n)
 	}
 }
 
-double SummPrice(const Orders *a, int n) 
+double SummPrice(const Orders *a, int n)
 {
 	if (!a)
 		return;
@@ -140,42 +141,92 @@ double SummPrice(const Orders *a, int n)
 	int i = 0;
 	for (i; i < n; i++)
 		{
-			
-			if (Orders.condition.complited == 0 && Ordera.condition.paid == 1)			
-			summ += a[i].price;
-	    }	
+			if ((a+i)->condition.complited == 0 && (a+i)->condition.paid == 1)
+				summ += (a+i)->price;
+		}
 	return summ;
 }
 
-/*
-void Sort(Person *a, int n, Comparator cmp)
+double SummTime(const Orders *a, int n)
+{
+	if (!a)
+		return;
+	double summ = 0;
+	int i = 0;
+	for (i; i < n; i++)
+		{
+			if ((a+i)->condition.paid == 0)
+				summ += (a+i)->time;
+		}
+	return summ;
+}
+
+void SearchName(const Orders *a, const char name[51], int n)
+{
+	int i = 0, flag = 1;
+	for (i; i < n; i++)
+		{
+			if (!(strcmp((a+i)->name_company, name)))
+			{
+				PrintOrder(a+i);
+				flag = 0;
+			}
+			else if (i == n-1 && flag)
+				printf("No orders found");
+		}
+}
+
+typedef int (*Comparator)(const Orders *a, const Orders *b);
+
+int CompWeight(const Orders *a, const Orders *b)
+{
+	return (a->addmision.d > b->addmision.d && a->addmision.m > b->addmision.m && a->addmision.y > b->addmision.y);	/* need change copm for datasort */
+}
+
+void DataSort(Orders *a, int n, Comparator cmp)
 {
 	int i, j;
 	for (i = 0; i < n-1; i++)
 		for (j = 0; j < n - 1- i; j++)
 			if (cmp(&a[j], &a[j+1]))
 			{
-				Person p;
+				Orders p;
 				p = a[j];
 				a[j] = a[j+1];
 				a[j+1] = p;
 			}
 }
-*/
 
 int main()
 {
 	Orders a[20];
-	
+	char name_company_search[51];
 	int n = 0;
+	
 	while (printf("Enter count (>0 and <20): "),
 			fflush(stdin),
             scanf("%d", &n) != 1 || !(n > 0 && n <20))
         printf("Error! Pls, try again\n");
 	
 	InputOrdersArray(a, n);
+	
+	printf("\n\n__________________________________________\n\n");
+	
 	PrintOrdersArray(a, n);
-	printf("sum = %lf", SummPrice(a, n));
+	
+	printf("The cost of unfulfilled and paid orders = %.2lf\n", SummPrice(a, n));
+	printf("Total duration of unpaid orders = %.2lf\n\n", SummTime(a, n));
+	
+	printf("Company name for the search: ");
+	fflush(stdin);
+	scanf("%[^\n]s", name_company_search);
+	
+	SearchName(a, name_company_search, n);
+
+	printf("Sorting by date:\n\n");
+	DataSort(a, n, CompWeight);
+	PrintOrdersArray(a, n);
+
 	
 	system("pause");
 	return 0;
