@@ -2,14 +2,14 @@
 #include <stdlib.h>
 
 
-typedef struct Date	/* тут */
+typedef struct Date
 {
 	unsigned int d:5;
 	unsigned int m:4;
 	int y:13;
 } Date;
 
-typedef struct Condition	/* тут */
+typedef struct Condition
 {
 	unsigned int complited:1;
 	unsigned int paid:1;
@@ -25,24 +25,38 @@ typedef struct Orders
 	Condition condition;
 } Orders;
 
-void InputDate(Date *p)		/* тут */
+void InputDate(Date *p) 
 {
+	if (!p)
+		return;
+	int d, m, y;
 	while (printf("\taddmision (dd.mm.yyyy): "),
 				fflush(stdin),
-                scanf("%d.%d.%d", &p->d, &p->m, &p->y) != 3)
+                scanf("%d.%d.%d", &d, &m, &y) != 3 || !(d > 0 && d <= 31) || !(m > 0 && m <= 12))
             printf("Wrong data! Pls, try again (example: 08.10.2021)\n");
+	p->d = d;
+	p->m = m;
+	p->y = y;
+
 }
 
-void InputCondition(Condition *p)	/* тут */
+void InputCondition(Condition *p) 
 {
+	if (!p)
+		return;
+	int complited, paid;
 	while (printf("\tcondition (1 - done or 0 - not, 1 - paid or 0 - not):"),
 				fflush(stdin),
-            	scanf("%d, %d", &p->complited, &p->paid) != 2)
+            	scanf("%d, %d", &complited, &paid) != 2 || !(complited >= 0 && complited <= 1) || !(paid >= 0 && paid <= 1))
             printf("Error! Pls, try again (example: 1, 0)\n");
+    p->complited = complited;
+	p->paid = paid;
 }
 
 void InputOrder(Orders * p)
 {
+	if (!p)
+		return;
 	printf("Enter order info:\n\tcompany name: ");
 	fflush(stdin);
 	scanf("%[^\n]s", p->name_company);
@@ -60,11 +74,15 @@ void InputOrder(Orders * p)
 
 void PrintDate(const Date *p)
 {
+	if (!p)
+		return;
 	printf("%02d.%02d.%04d\n", p->d, p->m, p->y);
 }
 
 void PrintCondition(const Condition *p)
 {	
+	if (!p)
+		return;
 	if (p->complited == 1 && p->paid == 1)
 		printf("\tcondition: done, paid\n");
 	else if (p->complited == 1 && p->paid == 0)
@@ -77,6 +95,8 @@ void PrintCondition(const Condition *p)
 
 void PrintOrder(const Orders * p)
 {
+	if (!p)
+		return;
 	printf("\tcompany name: %s\n", p->name_company);
 	printf("\taddmision: ");
 	PrintDate(&p->addmision);
@@ -88,6 +108,8 @@ void PrintOrder(const Orders * p)
 
 void InputOrdersArray(Orders *a, int n)
 {
+	if (!a)
+		return;
 	int i;
 	for (i = 0; i < n; i++)
 	{
@@ -99,8 +121,10 @@ void InputOrdersArray(Orders *a, int n)
 
 void PrintOrdersArray(const Orders *a, int n)
 {
-	int i;
-	for (i = 0; i < n; i++)
+	if (!a)
+		return;
+	int i = 0;
+	for (i; i < n; i++)
 	{
 		printf("Order %d info:\n", i+1);
 		PrintOrder(a + i);
@@ -108,24 +132,50 @@ void PrintOrdersArray(const Orders *a, int n)
 	}
 }
 
-/* тут */
-double SummPrice(const Orders *a, int n)
+double SummPrice(const Orders *a, int n) 
 {
-	/* тут */
+	if (!a)
+		return;
+	double summ = 0;
+	int i = 0;
+	for (i; i < n; i++)
+		{
+			
+			if (Orders.condition.complited == 0 && Ordera.condition.paid == 1)			
+			summ += a[i].price;
+	    }	
+	return summ;
 }
-/* тут */
+
+/*
+void Sort(Person *a, int n, Comparator cmp)
+{
+	int i, j;
+	for (i = 0; i < n-1; i++)
+		for (j = 0; j < n - 1- i; j++)
+			if (cmp(&a[j], &a[j+1]))
+			{
+				Person p;
+				p = a[j];
+				a[j] = a[j+1];
+				a[j+1] = p;
+			}
+}
+*/
 
 int main()
 {
 	Orders a[20];
 	
 	int n = 0;
-	printf("Enter count: ");
-	scanf("%d", &n);
+	while (printf("Enter count (>0 and <20): "),
+			fflush(stdin),
+            scanf("%d", &n) != 1 || !(n > 0 && n <20))
+        printf("Error! Pls, try again\n");
 	
 	InputOrdersArray(a, n);
 	PrintOrdersArray(a, n);
-	
+	printf("sum = %lf", SummPrice(a, n));
 	
 	system("pause");
 	return 0;
