@@ -58,11 +58,11 @@ void InputOrder(Orders *p) {
     InputDate(&p->addmision);
     while (printf("\ttime (in minutes): "),
             fflush(stdin),
-            scanf("%lf", &p->time) != 1)
+            scanf("%lf", &p->time) != 1 || !(p->time > 0))
         printf("Error! Pls, try again (example: 60)\n");
     while (printf("\tprice: "),
             fflush(stdin),
-            scanf("%lf", &p->price) != 1)
+            scanf("%lf", &p->price) != 1 || !(p->price >= 0))
         printf("Error! Pls, try again (example: 999)\n");
     InputCondition(&p->condition);
 }
@@ -120,34 +120,52 @@ void PrintOrdersArray(const Orders *a, int n) {
     }
 }
 
-double SummPrice(const Orders *a, int n) {
+typedef int (*ComparatorSummPrice)(const Orders *a);
+
+int CompSummPrice (const Orders *a) {
+    return (a->condition.complited == 0 && a->condition.paid == 1);
+}
+
+double SummPrice(const Orders *a, int n, ComparatorSummPrice cmp) {
     if (!a)
         return;
     double summ = 0;
     int i = 0;
     for (i; i < n; i++) {
-        if ((a + i)->condition.complited == 0 && (a + i)->condition.paid == 1)
+        if (cmp(&a[i]))
             summ += (a + i)->price;
     }
     return summ;
 }
 
-double SummTime(const Orders *a, int n) {
+typedef int (*ComparatorSummTime)(const Orders *a);
+
+int CompSummTime (const Orders *a) {
+    return (a->condition.paid == 0);
+}
+
+double SummTime(const Orders *a, int n, ComparatorSummTime cmp) {
     if (!a)
         return;
     double summ = 0;
     int i = 0;
     for (i; i < n; i++) {
-        if ((a + i)->condition.paid == 0)
+        if (cmp(&a[i]))
             summ += (a + i)->time;
     }
     return summ;
 }
 
-void SearchName(const Orders *a, const char name[51], int n) {
+typedef int (*ComparatorSearch)(const Orders *a, const name);
+
+int CompSearch (const Orders *a, const name) {
+    return (strstr(a->name_company, name));
+}
+
+void SearchName(const Orders *a, const char name[51], int n, ComparatorSearch cmp) {
     int i = 0, flag = 1;
     for (i; i < n; i++) {
-        if (!(strcmp((a + i)->name_company, name))) {
+        if (cmp(&a[i], name)) { 
             PrintOrder(a + i);
             flag = 0;
         } else if (i == n - 1 && flag)
@@ -155,16 +173,16 @@ void SearchName(const Orders *a, const char name[51], int n) {
     }
 }
 
-typedef int (*Comparator)(const Orders *b, const Orders *a);
+typedef int (*ComparatorSort)(const Orders *b, const Orders *a);
 
-int CompWeight(const Orders *b, const Orders *a) {
+int CompData(const Orders *b, const Orders *a) {
     return (a->addmision.y < b->addmision.y) ||
            (a->addmision.y == b->addmision.y && a->addmision.m < b->addmision.m) ||
            (a->addmision.y == b->addmision.y && a->addmision.m == b->addmision.m &&
             a->addmision.d < b->addmision.d);
 }
 
-void DataSort(Orders *a, int n, Comparator cmp) {
+void DataSort(Orders *a, int n, ComparatorSort cmp) {
     int i, j;
     for (i = 0; i < n - 1; i++)
         for (j = 0; j < n - 1 - i; j++)
@@ -192,20 +210,20 @@ int main() {
 
     PrintOrdersArray(a, n);
 
-    printf("The cost of unfulfilled and paid orders = %.2lf\n", SummPrice(a, n));
-    printf("Total duration of unpaid orders = %.2lf\n\n", SummTime(a, n));
+    printf("The cost of unfulfilled and paid orders = %.2lf\n", SummPrice(a, n, CompSummPrice));
+    printf("Total duration of unpaid orders = %.2lf\n\n", SummTime(a, n, CompSummTime));
 
     printf("Company name for the search: ");
     fflush(stdin);
     scanf("%[^\n]s", name_company_search);
 
-    SearchName(a, name_company_search, n);
+    SearchName(a, name_company_search, n, CompSearch);
 
     printf("Sorting by date:\n\n");
-    DataSort(a, n, CompWeight);
+    DataSort(a, n, CompData);
     PrintOrdersArray(a, n);
 
 
     system("pause");
     return 0;
-}
+}	
