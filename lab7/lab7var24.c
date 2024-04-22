@@ -122,13 +122,13 @@ void PrintOrdersArray(const Orders *a, int n) {
 
 typedef int (*ComparatorSummPrice)(const Orders *a);
 
-int CompSummPrice (const Orders *a) {
+int CompSummPrice(const Orders *a) {
     return (a->condition.complited == 0 && a->condition.paid == 1);
 }
 
 double SummPrice(const Orders *a, int n, ComparatorSummPrice cmp) {
     if (!a)
-        return;
+        return -1;
     double summ = 0;
     int i = 0;
     for (i; i < n; i++) {
@@ -140,13 +140,13 @@ double SummPrice(const Orders *a, int n, ComparatorSummPrice cmp) {
 
 typedef int (*ComparatorSummTime)(const Orders *a);
 
-int CompSummTime (const Orders *a) {
+int CompSummTime(const Orders *a) {
     return (a->condition.paid == 0);
 }
 
 double SummTime(const Orders *a, int n, ComparatorSummTime cmp) {
     if (!a)
-        return;
+        return -1;
     double summ = 0;
     int i = 0;
     for (i; i < n; i++) {
@@ -156,16 +156,16 @@ double SummTime(const Orders *a, int n, ComparatorSummTime cmp) {
     return summ;
 }
 
-typedef int (*ComparatorSearch)(const Orders *a, const name);
+typedef int (*ComparatorSearch)(const Orders *a, const char name[51]);
 
-int CompSearch (const Orders *a, const name) {
-    return (strstr(a->name_company, name));
+int CompSearch(const Orders *a, const char name[51]) {
+    return ((int) strstr(a->name_company, name));
 }
 
 void SearchName(const Orders *a, const char name[51], int n, ComparatorSearch cmp) {
     int i = 0, flag = 1;
     for (i; i < n; i++) {
-        if (cmp(&a[i], name)) { 
+        if (cmp(&a[i], name)) {
             PrintOrder(a + i);
             flag = 0;
         } else if (i == n - 1 && flag)
