@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* ñîçäàíèå ñòðóêòóð */
-
 typedef struct Date {
     unsigned int d: 5;
     unsigned int m: 4;
@@ -15,7 +13,6 @@ typedef struct Condition {
     unsigned int paid: 1;
 } Condition;
 
-
 typedef struct Orders {
     char name_company[51];
     Date addmision;
@@ -23,10 +20,6 @@ typedef struct Orders {
     double price;
     Condition condition;
 } Orders;
-
-/* êîíåö ñîçäàíèÿ ñòðóêòóð */
-
-/* ðàáîòà ñ ââîäîì çàêàçà */
 
 void InputDate(Date *p) {
     if (!p)
@@ -39,7 +32,6 @@ void InputDate(Date *p) {
     p->d = d;
     p->m = m;
     p->y = y;
-
 }
 
 void InputCondition(Condition *p) {
@@ -72,10 +64,6 @@ void InputOrder(Orders *p) {
     InputCondition(&p->condition);
 }
 
-/* êîíåö ðàáîòû ñ ââîäîì çàêàçà */
-
-/* ðàáîòà ñ âûâîäîì çàêàçà */
-
 void PrintDate(const Date *p) {
     if (!p)
         return;
@@ -107,24 +95,16 @@ void PrintOrder(const Orders *p) {
     printf("\n");
 }
 
-/* êîíåö ðàáîòû ñ âûâîäîì çàêàçà */
-
-/* ðàáîòà ñî ñïèñêîì çàêàçîâ */
-
-void InputOrdersArray(Orders *a, int n) {
-	int i, kk;
-
-	if (!a)
+void InputOrdersArray(Orders *a, int *n) {
+    if (!a)
         return;
-        
-    while (printf("Enter count (>1 and <%d): ", 20 - n),
+    int i, kk;
+    while (printf("Enter count (>1 and <%d): ", 20 - *n),
             fflush(stdin),
-            scanf("%d", &kk) != 1 || !(kk > 1 && kk < (20 - n)))
+            scanf("%d", &kk) != 1 || !(kk > 1 && kk < (20 - *n)))
         printf("Error! Pls, try again\n");
-    
-    n = n + kk;
-    
-    for (i = n - kk; i < n; i++) {
+    *n = *n + kk;
+    for (i = *n - kk; i < *n; i++) {
         printf("Order %d\n", i + 1);
         InputOrder(a + i);
         printf("\n");
@@ -141,10 +121,6 @@ void PrintOrdersArray(const Orders *a, int n) {
         printf("\n");
     }
 }
-
-/* êîíåö ðàáîòû ñî ñïèñêîì çàêàçîâ */
-
-/* ðàáîòà ñ ôóíêöèÿìè ñóììû çàêàçîâ */
 
 typedef int (*ComparatorSummPrice)(const Orders *a);
 
@@ -182,10 +158,6 @@ double SummTime(const Orders *a, int n, ComparatorSummTime cmp) {
     return summ;
 }
 
-/* êîíåö ðàáîòû ñ ôóíêöèÿìè ñóììû çàêàçîâ */
-
-/* ðàáîòà ñ ôóíêöèÿìè ïîèñêà çàêàçîâ */
-
 typedef int (*ComparatorSearch)(const Orders *a, const char name[51]);
 
 int CompSearch(const Orders *a, const char name[51]) {
@@ -193,12 +165,10 @@ int CompSearch(const Orders *a, const char name[51]) {
 }
 
 void SearchName(const Orders *a, const char name[51], int n, ComparatorSearch cmp) {
-	int i = 0, flag = 1;
-
-	printf("Company name for the search: ");
+    int i = 0, flag = 1;
+    printf("Company name for the search: ");
     fflush(stdin);
     scanf("%[^\n]s", name);
-    
     for (i; i < n; i++) {
         if (cmp(&a[i], name)) {
             PrintOrder(a + i);
@@ -207,11 +177,6 @@ void SearchName(const Orders *a, const char name[51], int n, ComparatorSearch cm
             printf("No orders found");
     }
 }
-
-/* êîíåö ðàáîòû ñ ôóíêöèÿìè ïîèñêà çàêàçîâ */
-
-/* ðàáîòà ñ ôóíêöèÿìè ñîðòèðîâêè çàêàçîâ */
-
 
 typedef int (*ComparatorSort)(const Orders *b, const Orders *a);
 
@@ -232,74 +197,101 @@ void DataSort(Orders *a, int n, ComparatorSort cmp) {
                 a[j] = a[j + 1];
                 a[j + 1] = p;
             }
+    printf("Sort is done\n");
 }
 
-/* êîíåö ðàáîòû ñ ôóíêöèÿìè ñîðòèðîâêè çàêàçîâ */
+void DeleteOrder(Orders *a, int *n, int index) {
+    if (!a || index < 0 || index >= *n)
+        return;
+    for (int i = index; i < (*n) - 1; i++)
+        a[i] = a[i + 1];
+    (*n)--;
+    printf("Delete is done\n");
+}
+
+void DeleteAllOrders(Orders *a, int *n) {
+    if (!a)
+        return;
+    *n = 0;
+    printf("Delete is done\n");
+}
 
 
 int main() {
     Orders a[20];
     char name_company_search[51];
     int n = 0, k = -1, i;
-    
-    while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit"),
+
+    while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
             fflush(stdin),
-            scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
+            scanf("%d",` &k) != 1 || !(k >= -1 && k < 11 ))
         printf("Error! Pls, try again\n");
     while (1) {
-    	switch ( k )
-	{
-    	case 1:
-    		if (n < 20) {
-    			InputOrder(a + n);
-    			n++;
-        	    break;
-			}
-        	else {
-        		printf("Orders array is maximum!/n/n");
-        		break;
-			}
-    	case 2:
-    		if (n < 19) {
-    			InputOrdersArray(a, n);
-    			break;
-			}
-    		else {
-    			printf("Orders array is maximum!/n/n");
-        		break;
-			}
-        case 3:
-        	while (printf("Number of order: "),
-            	fflush(stdin),
-            	scanf("%d", &i) != 1 || !(i > 0 && i < n))
-        	printf("Not in array\n");
-        	PrintOrder(a + i - 1);
-        	break;
-        case 4:
-        	PrintOrdersArray(a, n);
-        	break;
-        case 5:
-        	printf("The cost of unfulfilled and paid orders = %.2lf\n", SummPrice(a, n, CompSummPrice));
-        	break;
-        case 6:
-        	printf("Total duration of unpaid orders = %.2lf\n\n", SummTime(a, n, CompSummTime));
-        	break;
-        case 7:
-        	SearchName(a, name_company_search, n, CompSearch);
-        	break;
-        case 8:
-        	printf("Sorting by date:\n\n");
-    		DataSort(a, n, CompData);
-    		PrintOrdersArray(a, n);
-    	case 9:
-    	case 10:
-    	case -1:
-    		system("pause");
-    		return 0;  		
-	}
-	    while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit"),
-            fflush(stdin),
-            scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
-        printf("Error! Pls, try again\n");
-	}
-}	
+        switch ( k )
+        {
+            case 1:
+                if (n < 20) {
+                    InputOrder(a + n);
+                    n++;
+                    break;
+                }
+                else {
+                    printf("Orders array is maximum!\n\n");
+                    break;
+                }
+            case 2:
+                if (n < 19) {
+                    InputOrdersArray(a, &n);
+                    break;
+                }
+                else {
+                    printf("Orders array is maximum!\n\n");
+                    break;
+                }
+            case 3:
+                printf("The number of orders in the list: %d\n", n);
+                while (printf("Number of order: "),
+                        fflush(stdin),
+                        scanf("%d", &i) != 1 || !(i > 0 && i <= n))
+                    printf("Not in array\n");
+                PrintOrder(a + i - 1);
+                break;
+            case 4:
+                printf("The number of orders in the list: %d\n", n);
+                PrintOrdersArray(a, n);
+                break;
+            case 5:
+                printf("The cost of unfulfilled and paid orders = %.2lf\n", SummPrice(a, n, CompSummPrice));
+                break;
+            case 6:
+                printf("Total duration of unpaid orders = %.2lf\n\n", SummTime(a, n, CompSummTime));
+                break;
+            case 7:
+                SearchName(a, name_company_search, n, CompSearch);
+                break;
+            case 8:
+                printf("Sorting by date:\n\n");
+                DataSort(a, n, CompData);
+                PrintOrdersArray(a, n);
+                break;
+            case 9:
+                printf("The number of orders in the list: %d\n", n);
+                while (printf("Number of order: "),
+                        fflush(stdin),
+                        scanf("%d", &i) != 1 || !(i > 0 && i <= n))
+                    printf("Not in array\n");
+                DeleteOrder(a, &n, i - 1);
+                break;
+            case 10:
+                DeleteAllOrders(a, &n);
+                break;
+            case -1:
+                system("pause");
+                return 0;
+        }
+        while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
+                fflush(stdin),
+                scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
+            printf("Error! Pls, try again\n");
+    }
+}
