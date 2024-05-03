@@ -64,6 +64,26 @@ void InputOrder(Orders *p) {
     InputCondition(&p->condition);
 }
 
+void InputOrderIndex(Orders *p, int k, int *n) {
+	int i;
+    for (i = *n; i > k; i--){
+        p[i] = p[i-1];
+	}
+	printf("Enter order info:\n\tcompany name: ");
+    fflush(stdin);
+    scanf("%[^\n]s", p[k].name_company);
+    InputDate(&p[k].addmision);
+    while (printf("\ttime (in minutes): "),
+            fflush(stdin),
+            scanf("%lf", &p[k].time) != 1 || !(p[k].time > 0))
+        printf("Error! Pls, try again (example: 60)\n");
+    while (printf("\tprice: "),
+            fflush(stdin),
+            scanf("%lf", &p[k].price) != 1 || !(p[k].price >= 0))
+        printf("Error! Pls, try again (example: 999)\n");
+    InputCondition(&p[k].condition);
+}
+
 void PrintDate(const Date *p) {
     if (!p)
         return;
@@ -99,9 +119,9 @@ void InputOrdersArray(Orders *a, int *n) {
     if (!a)
         return;
     int i, kk;
-    while (printf("Enter count (>1 and <%d): ", 20 - *n),
+    while (printf("Enter count (>0 and <%d): ", 20 - *n),
             fflush(stdin),
-            scanf("%d", &kk) != 1 || !(kk > 1 && kk < (20 - *n)))
+            scanf("%d", &kk) != 1 || !(kk > 0 && kk < (20 - *n)))
         printf("Error! Pls, try again\n");
     *n = *n + kk;
     for (i = *n - kk; i < *n; i++) {
@@ -201,9 +221,10 @@ void DataSort(Orders *a, int n, ComparatorSort cmp) {
 }
 
 void DeleteOrder(Orders *a, int *n, int index) {
+	int i = index;
     if (!a || index < 0 || index >= *n)
         return;
-    for (int i = index; i < (*n) - 1; i++)
+    for (i; i < (*n) - 1; i++)
         a[i] = a[i + 1];
     (*n)--;
     printf("Delete is done\n");
@@ -222,25 +243,32 @@ int main() {
     char name_company_search[51];
     int n = 0, k = -1, i;
 
-    while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
+    while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
             fflush(stdin),
-            scanf("%d",` &k) != 1 || !(k >= -1 && k < 11 ))
+            scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
         printf("Error! Pls, try again\n");
     while (1) {
         switch ( k )
         {
             case 1:
                 if (n < 20) {
-                    InputOrder(a + n);
-                    n++;
-                    break;
+                	printf("Enter the number under which to add the order: ");
+                	if (scanf("%d", &k) != 1 || !(k > 0 && k <= n)) {
+                		printf("Not in array\n");
+                		break;
+					}
+                	else {
+                    	InputOrderIndex(a, k - 1, &n);
+                    	n++;
+                	}
+                	break;
                 }
                 else {
                     printf("Orders array is maximum!\n\n");
                     break;
                 }
             case 2:
-                if (n < 19) {
+                if (n < 20) {
                     InputOrdersArray(a, &n);
                     break;
                 }
@@ -249,12 +277,16 @@ int main() {
                     break;
                 }
             case 3:
-                printf("The number of orders in the list: %d\n", n);
-                while (printf("Number of order: "),
-                        fflush(stdin),
-                        scanf("%d", &i) != 1 || !(i > 0 && i <= n))
-                    printf("Not in array\n");
-                PrintOrder(a + i - 1);
+                if (n == 0) {
+                	printf("Orders are empty");
+                	break;
+				}
+				printf("The number of orders in the list: %d\n", n);
+                printf("Number of order: ");
+                if (scanf("%d", &i) != 1 || !(i > 0 && i <= n))
+                	printf("Not in array\n");
+                else
+                	PrintOrder(a + i - 1);
                 break;
             case 4:
                 printf("The number of orders in the list: %d\n", n);
@@ -276,11 +308,13 @@ int main() {
                 break;
             case 9:
                 printf("The number of orders in the list: %d\n", n);
-                while (printf("Number of order: "),
-                        fflush(stdin),
-                        scanf("%d", &i) != 1 || !(i > 0 && i <= n))
-                    printf("Not in array\n");
-                DeleteOrder(a, &n, i - 1);
+				printf("Number of order: ");
+                if (scanf("%d", &i) != 1 || !(i > 0 && i <= n)) {
+                	printf("Not in array\n");
+                	break;
+				}
+                else
+                	DeleteOrder(a, &n, i - 1);
                 break;
             case 10:
                 DeleteAllOrders(a, &n);
@@ -289,7 +323,7 @@ int main() {
                 system("pause");
                 return 0;
         }
-        while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
+        while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
                 fflush(stdin),
                 scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
             printf("Error! Pls, try again\n");
