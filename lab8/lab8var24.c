@@ -245,7 +245,7 @@ int main() {
 
     while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
             fflush(stdin),
-            scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
+            scanf("%d", &k) != 1 || !(k >= -1 && k < 14 && k != 0))
         printf("Error! Pls, try again\n");
     while (1) {
         switch ( k )
@@ -325,7 +325,7 @@ int main() {
         }
         while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t-1 - Exit\n"),
                 fflush(stdin),
-                scanf("%d", &k) != 1 || !(k >= -1 && k < 11 ))
+                scanf("%d", &k) != 1 || !(k >= -1 && k < 14 && k != 0))
             printf("Error! Pls, try again\n");
     }
 }
