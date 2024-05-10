@@ -64,12 +64,13 @@ void InputOrder(Orders *p) {
     InputCondition(&p->condition);
 }
 
+
 void InputOrderIndex(Orders *p, int k, int *n) {
-    int i;
+	int i;
     for (i = *n; i > k; i--){
         p[i] = p[i-1];
-    }
-    printf("Enter order info:\n\tcompany name: ");
+	}
+	printf("Enter order info:\n\tcompany name: ");
     fflush(stdin);
     scanf("%[^\n]s", p[k].name_company);
     InputDate(&p[k].addmision);
@@ -115,6 +116,7 @@ void PrintOrder(const Orders *p) {
     printf("\n");
 }
 
+
 void InputOrdersArray(Orders *a, int *n) {
     if (!a)
         return;
@@ -130,7 +132,6 @@ void InputOrdersArray(Orders *a, int *n) {
         printf("\n");
     }
 }
-
 void PrintOrdersArray(const Orders *a, int n) {
     if (!a)
         return;
@@ -221,7 +222,7 @@ void DataSort(Orders *a, int n, ComparatorSort cmp) {
 }
 
 void DeleteOrder(Orders *a, int *n, int index) {
-    int i = index;
+	int i = index;
     if (!a || index < 0 || index >= *n)
         return;
     for (i; i < (*n) - 1; i++)
@@ -237,11 +238,26 @@ void DeleteAllOrders(Orders *a, int *n) {
     printf("Delete is done\n");
 }
 
+int CheckExtension(char * filename) {
+	int lenstr;
+	lenstr = strlen(filename);
+    if  (lenstr < 4 || strcmp(filename + lenstr - 4, ".dat") != 0) {
+    	strcat(filename, ".dat");
+    	return 1;
+	}
+	else {
+		printf("Not found\n");
+		return 0;
+	}
+}
+
 void SaveOrdersToFile(const Orders *a, int n) {
     char filename[256];
     printf("Enter the filename to save: ");
     scanf("%s", filename);
-    FILE *file = fopen(filename, "w");
+    if (!(CheckExtension(filename)))
+		return;
+    FILE *file = fopen(filename, "wb");
     if (!file) {
         printf("Failed to open the file.\n");
         return;
@@ -254,24 +270,45 @@ void SaveOrdersToFile(const Orders *a, int n) {
 
 void LoadOrdersFromFile(Orders *a, int *n) {
     char filename[256];
+    int size;
+
     printf("Enter the filename to load: ");
     scanf("%s", filename);
-    FILE *file = fopen(filename, "r");
+    
+    if (!(CheckExtension(filename)))
+		return;
+		
+    FILE *file = fopen(filename, "rb");
     if (!file) {
+    	fclose(file);
         printf("Failed to open the file.\n");
         return;
     }
+    
     fread(n, sizeof(int), 1, file);
+	
+	fseek(file, 0, SEEK_END);
+	size = ftell(file) - sizeof(int);
+	if (size / sizeof(Orders) != *n)
+	{
+		printf("Mismatch in the number of structures\n");
+		fclose(file);
+		return;
+	}
+
     fread(a, sizeof(Orders), *n, file);
     fclose(file);
     printf("Data loaded successfully.\n");
 }
 
+
 void DestroyFileData() {
     char filename[256];
     printf("Enter the filename to destroy data: ");
     scanf("%s", filename);
-    FILE *file = fopen(filename, "w");
+    if (!(CheckExtension(filename)))
+		return;
+    FILE *file = fopen(filename, "wb");
     if (!file) {
         printf("Failed to open the file.\n");
         return;
@@ -285,32 +322,32 @@ int main() {
     char name_company_search[51];
     int n = 0, k = -1, i;
 
-    while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
+    while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
             fflush(stdin),
-            scanf("%d", &k) != 1 || !(k >= -1 && k < 14 && k != 0))
+            scanf("%d", &k) != 1 || !(k >= -1 && k < 14 ))
     printf("Error! Pls, try again\n");
     while (1) {
         switch ( k )
         {
-            case 1:
+                        case 1:
                 if (n < 20) {
-                    printf("Enter the number under which to add the order: ");
-                    if (scanf("%d", &k) != 1 || !(k > -1 && k <= n)) {
-                        printf("Not in array\n");
-                        break;
-                    }
-                    else {
-                        InputOrderIndex(a, k - 1, &n);
-                        n++;
-                    }
-                    break;
+                	printf("Enter the number under which to add the order: ");
+                	if (scanf("%d", &k) != 1 || !(k > 0 && k <= n)) {
+                		printf("Not in array\n");
+                		break;
+					}
+                	else {
+                    	InputOrderIndex(a, k - 1, &n);
+                    	n++;
+                	}
+                	break;
                 }
                 else {
                     printf("Orders array is maximum!\n\n");
                     break;
                 }
             case 2:
-                if (n < 20) {
+                if (n < 19) {
                     InputOrdersArray(a, &n);
                     break;
                 }
@@ -320,15 +357,15 @@ int main() {
                 }
             case 3:
                 if (n == 0) {
-                    printf("Orders are empty");
-                    break;
-                }
-                printf("The number of orders in the list: %d\n", n);
+                	printf("Orders are empty");
+                	break;
+				}
+				printf("The number of orders in the list: %d\n", n);
                 printf("Number of order: ");
                 if (scanf("%d", &i) != 1 || !(i > 0 && i <= n))
-                    printf("Not in array\n");
+                	printf("Not in array\n");
                 else
-                    PrintOrder(a + i - 1);
+                	PrintOrder(a + i - 1);
                 break;
             case 4:
                 printf("The number of orders in the list: %d\n", n);
@@ -350,13 +387,13 @@ int main() {
                 break;
             case 9:
                 printf("The number of orders in the list: %d\n", n);
-                printf("Number of order: ");
+				printf("Number of order: ");
                 if (scanf("%d", &i) != 1 || !(i > 0 && i <= n)) {
-                    printf("Not in array\n");
-                    break;
-                }
+                	printf("Not in array\n");
+                	break;
+				}
                 else
-                    DeleteOrder(a, &n, i - 1);
+                	DeleteOrder(a, &n, i - 1);
                 break;
             case 10:
                 DeleteAllOrders(a, &n);
@@ -374,9 +411,9 @@ int main() {
                 system("pause");
                 return 0;
         }
-        while (printf("Select an action:\n\t1 - Adding an order\n\t2 - Adding multiple orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
+        while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
                 fflush(stdin),
-                scanf("%d", &k) != 1 || !(k >= -1 && k < 14 && k != 0))
+                scanf("%d", &k) != 1 || !(k >= -1 && k < 14 ))
             printf("Error! Pls, try again\n");
     }
 }
