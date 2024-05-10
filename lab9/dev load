@@ -1,0 +1,27 @@
+void LoadOrdersFromFile(Orders *a, int *n) {
+    char filename[256];
+    int fileCount = 0; // Переменная для хранения количества структур в файле
+
+    printf("Enter the filename to load: ");
+    scanf("%s", filename);
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        printf("Failed to open the file.\n");
+        return;
+    }
+
+    // Считываем количество структур, записанное в файле
+    fread(&fileCount, sizeof(int), 1, file);
+
+    // Проверяем, совпадает ли считанное количество с ожидаемым
+    if (fileCount != *n) {
+        printf("Mismatch in the number of structures. Expected %d, but found %d in the file.\n", *n, fileCount);
+        // Здесь можно добавить обработку ошибки или корректировку значения *n
+        *n = fileCount; // Корректируем значение *n до реального количества структур в файле
+    }
+
+    // Считываем структуры из файла
+    fread(a, sizeof(Orders), *n, file);
+    fclose(file);
+    printf("Data loaded successfully.\n");
+}
