@@ -48,7 +48,6 @@ void InputCondition(Condition *p) {
 
 void InputOrder(Orders *p) {
     if (!p)
-        \
         return;
     printf("Enter order info:\n\tcompany name: ");
     fflush(stdin);
@@ -56,34 +55,39 @@ void InputOrder(Orders *p) {
     InputDate(&p->addmision);
     while (printf("\ttime (in minutes): "),
             fflush(stdin),
-            scanf("%lf", &p->time) != 1 || !(p->time > 0))
+            scanf("%lf", &p->time) != 1 || p->time <= 0)
         printf("Error! Pls, try again (example: 60)\n");
     while (printf("\tprice: "),
             fflush(stdin),
-            scanf("%lf", &p->price) != 1 || !(p->price >= 0))
+            scanf("%lf", &p->price) != 1 || p->price < 0)
         printf("Error! Pls, try again (example: 999)\n");
     InputCondition(&p->condition);
 }
 
+void InputOrderIndex(Orders **p, int k, int *n) {
+    *p = realloc(*p, (*n + 1) * sizeof(Orders));  // Выделение памяти
+    if (!*p) {
+        printf("Memory allocation failed\n");
+        return;
+    }
 
-void InputOrderIndex(Orders *p, int k, int *n) {
-	int i;
-    for (i = *n; i > k; i--){
-        p[i] = p[i-1];
-	}
-	printf("Enter order info:\n\tcompany name: ");
+    for (int i = *n; i > k; i--) {
+        (*p)[i] = (*p)[i - 1];
+    }
+    printf("Enter order info:\n\tcompany name: ");
     fflush(stdin);
-    scanf("%[^\n]s", p[k].name_company);
-    InputDate(&p[k].addmision);
+    scanf("%[^\n]s", (*p)[k].name_company);
+    InputDate(&(*p)[k].addmision);
     while (printf("\ttime (in minutes): "),
             fflush(stdin),
-            scanf("%lf", &p[k].time) != 1 || !(p[k].time > 0))
+            scanf("%lf", &(*p)[k].time) != 1 || (*p)[k].time <= 0)
         printf("Error! Pls, try again (example: 60)\n");
     while (printf("\tprice: "),
             fflush(stdin),
-            scanf("%lf", &p[k].price) != 1 || !(p[k].price >= 0))
+            scanf("%lf", &(*p)[k].price) != 1 || (*p)[k].price < 0)
         printf("Error! Pls, try again (example: 999)\n");
-    InputCondition(&p[k].condition);
+    InputCondition(&(*p)[k].condition);
+    (*n)++;
 }
 
 void PrintDate(const Date *p) {
@@ -117,23 +121,32 @@ void PrintOrder(const Orders *p) {
     printf("\n");
 }
 
-
-void InputOrdersArray(Orders *a, int *n) {
-    if (!a)
-        return;
+void InputOrdersArray(Orders **a, int *n) {
     int i, kk;
-    while (printf("Enter count (>0 and <%d): ", 20 - *n),
+    while (printf("Enter count (>0): "),
             fflush(stdin),
-            scanf("%d", &kk) != 1 || !(kk > 0 && kk < (20 - *n)))
+            scanf("%d", &kk) != 1 || !(kk > 0))
         printf("Error! Pls, try again\n");
-    *n = *n + kk;
-    for (i = *n - kk; i < *n; i++) {
+
+    *a = realloc(*a, (*n + kk) * sizeof(Orders));
+    if (!*a) {
+        printf("Memory allocation failed\n");
+        return;
+    }
+
+    for (i = *n; i < *n + kk; i++) {
         printf("Order %d\n", i + 1);
-        InputOrder(a + i);
+        InputOrder(*a + i);
         printf("\n");
     }
+    *n += kk;
 }
+
 void PrintOrdersArray(const Orders *a, int n) {
+    if (n == 0) {
+        printf("Zero orders\n\n");
+        return;
+    }
     if (!a)
         return;
     int i;
@@ -155,9 +168,9 @@ double SummPrice(const Orders *a, int n, ComparatorSummPrice cmp) {
         return -1;
     double summ = 0;
     int i = 0;
-    for (i; i < n; i++) {
+    for (i = 0; i < n; i++) {
         if (cmp(&a[i]))
-            summ += (a + i)->price;
+            summ += a[i].price;
     }
     return summ;
 }
@@ -173,9 +186,9 @@ double SummTime(const Orders *a, int n, ComparatorSummTime cmp) {
         return -1;
     double summ = 0;
     int i = 0;
-    for (i; i < n; i++) {
+    for (i = 0; i < n; i++) {
         if (cmp(&a[i]))
-            summ += (a + i)->time;
+            summ += a[i].time;
     }
     return summ;
 }
@@ -183,20 +196,20 @@ double SummTime(const Orders *a, int n, ComparatorSummTime cmp) {
 typedef int (*ComparatorSearch)(const Orders *a, const char name[51]);
 
 int CompSearch(const Orders *a, const char name[51]) {
-    return ((int) strstr(a->name_company, name));
+    return (strstr(a->name_company, name) != NULL);
 }
 
 void SearchName(const Orders *a, const char name[51], int n, ComparatorSearch cmp) {
     int i = 0, flag = 1;
     printf("Company name for the search: ");
     fflush(stdin);
-    scanf("%[^\n]s", name);
-    for (i; i < n; i++) {
+    scanf("%sn]s", name);
+    for (i = 0; i < n; i++) {
         if (cmp(&a[i], name)) {
             PrintOrder(a + i);
             flag = 0;
         } else if (i == n - 1 && flag)
-            printf("No orders found");
+            printf("No orders found\n");
     }
 }
 
@@ -219,37 +232,40 @@ void DataSort(Orders *a, int n, ComparatorSort cmp) {
                 a[j] = a[j + 1];
                 a[j + 1] = p;
             }
-    printf("Sort is done\n");
 }
 
-void DeleteOrder(Orders *a, int *n, int index) {
-	int i = index;
-    if (!a || index < 0 || index >= *n)
+int CheckExtension(char *filename) {
+    int lenstr;
+    lenstr = strlen(filename);
+    if (lenstr < 4 || strcmp(filename + lenstr - 4, ".dat") != 0) {
+        strcat(filename, ".dat");
+        return 1;
+    } else {
+        printf("Not found\n");
+        return 0;
+    }
+}
+
+void DeleteOrder(Orders **a, int *n, int pos) {
+    if (pos < 0 || pos >= *n) {
+        printf("Invalid position.\n");
         return;
-    for (i; i < (*n) - 1; i++)
-        a[i] = a[i + 1];
+    }
+    for (int i = pos; i < *n - 1; i++) {
+        *a[i] = *a[i + 1];
+    }
     (*n)--;
-    printf("Delete is done\n");
-}
-
-void DeleteAllOrders(Orders *a, int *n) {
-    if (!a)
+    *a = realloc(*a, (*n) * sizeof(Orders));
+    if (!*a) {
+        printf("Memory allocation failed\n");
         return;
-    *n = 0;
-    printf("Delete is done\n");
+    }
 }
 
-int CheckExtension(char * filename) {
-	int lenstr;
-	lenstr = strlen(filename);
-    if  (lenstr < 4 || strcmp(filename + lenstr - 4, ".dat") != 0) {
-    	strcat(filename, ".dat");
-    	return 1;
-	}
-	else {
-		printf("Not found\n");
-		return 0;
-	}
+void DeleteAllOrders(Orders **a, int *n) {
+    free(*a);
+    *a = NULL;
+    *n = 0;
 }
 
 void SaveOrdersToFile(const Orders *a, int n) {
@@ -257,7 +273,7 @@ void SaveOrdersToFile(const Orders *a, int n) {
     printf("Enter the filename to save: ");
     scanf("%s", filename);
     if (!(CheckExtension(filename)))
-		return;
+        return;
     FILE *file = fopen(filename, "wb");
     if (!file) {
         printf("Failed to open the file.\n");
@@ -269,35 +285,40 @@ void SaveOrdersToFile(const Orders *a, int n) {
     printf("Data saved successfully.\n");
 }
 
-void LoadOrdersFromFile(Orders *a, int *n) {
+void LoadOrdersFromFile(Orders **a, int *n) {
     char filename[256];
-    int size;
+    int size, n_check;
 
     printf("Enter the filename to load: ");
     scanf("%s", filename);
 
     if (!(CheckExtension(filename)))
-		return;
+        return;
 
     FILE *file = fopen(filename, "rb");
     if (!file) {
-    	fclose(file);
+        fclose(file);
         printf("Failed to open the file.\n");
         return;
     }
 
-    fread(n, sizeof(int), 1, file);
+    fread(&n_check, sizeof(int), 1, file);
 
-	fseek(file, 0, SEEK_END);
-	size = ftell(file) - sizeof(int);
-	if (size / sizeof(Orders) != *n)
-	{
-		printf("Mismatch in the number of structures\n");
-		fclose(file);
-		return;
-	}
-
-    fread(a, sizeof(Orders), *n, file);
+    fseek(file, 0, SEEK_END);
+    size = ftell(file) - sizeof(int);
+    fseek(file, sizeof(int), SEEK_SET);
+    if (size / sizeof(Orders) != n_check) {
+        printf("Mismatch in the number of structures\n");
+        fclose(file);
+        return;
+    }
+    *a = realloc(*a, (n_check) * sizeof(Orders));    // Выделение памяти для загрузки
+    if (!*a) {
+        printf("Memory allocation failed\n");
+        return;
+    }
+    *n = n_check;
+    fread(*a, sizeof(Orders), *n, file);
     fclose(file);
     printf("Data loaded successfully.\n");
 }
@@ -308,7 +329,7 @@ void DestroyFileData() {
     printf("Enter the filename to destroy data: ");
     scanf("%s", filename);
     if (!(CheckExtension(filename)))
-		return;
+        return;
     FILE *file = fopen(filename, "wb");
     if (!file) {
         printf("Failed to open the file.\n");
@@ -319,102 +340,85 @@ void DestroyFileData() {
 }
 
 int main() {
-    Orders a[20];
-    char name_company_search[51];
-    int n = 0, k = -1, i;
+    void *a = NULL;
+    int n = 0, choice, pos;
+    double summ_price, summ_time;
+    char name[51];
 
-    while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
-            fflush(stdin),
-            scanf("%d", &k) != 1 || !(k >= -1 && k < 14 ))
-    printf("Error! Pls, try again\n");
     while (1) {
-        switch ( k )
-        {
-                        case 1:
-                if (n < 20) {
-                	printf("Enter the number under which to add the order: ");
-                	if (scanf("%d", &k) != 1 || !(k > 0 && k <= n)) {
-                		printf("Not in array\n");
-                		break;
-					}
-                	else {
-                    	InputOrderIndex(a, k - 1, &n);
-                    	n++;
-                	}
-                	break;
-                }
-                else {
-                    printf("Orders array is maximum!\n\n");
+        while (printf(
+                "Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
+                fflush(stdin),
+                scanf("%d", &choice) != 1 || !(choice >= -1 && choice < 14))
+            printf("Error! Pls, try again\n");
+
+        switch (choice) {
+            case 1:
+                printf("Enter position to insert (0-%d): ", n);
+                scanf("%d", &pos);
+                if (pos < 0 || pos > n) {
+                    printf("Invalid position.\n");
                     break;
                 }
+                InputOrderIndex((Orders **) &a, pos, &n);
+                break;
             case 2:
-                if (n < 19) {
-                    InputOrdersArray(a, &n);
-                    break;
-                }
-                else {
-                    printf("Orders array is maximum!\n\n");
-                    break;
-                }
+                InputOrdersArray((Orders **) &a, &n);
+                break;
             case 3:
-                if (n == 0) {
-                	printf("Orders are empty");
-                	break;
-				}
-				printf("The number of orders in the list: %d\n", n);
-                printf("Number of order: ");
-                if (scanf("%d", &i) != 1 || !(i > 0 && i <= n))
-                	printf("Not in array\n");
-                else
-                	PrintOrder(a + i - 1);
+                printf("Enter order number to print (1-%d): ", n);
+                scanf("%d", &pos);
+                if (pos < 1 || pos > n) {
+                    printf("Invalid order number.\n");
+                    break;
+                }
+                PrintOrder(a + pos - 1);
                 break;
             case 4:
-                printf("The number of orders in the list: %d\n", n);
-                PrintOrdersArray(a, n);
+                PrintOrdersArray((const Orders *) a, n);
                 break;
             case 5:
-                printf("The cost of unfulfilled and paid orders = %.2lf\n", SummPrice(a, n, CompSummPrice));
+                summ_price = SummPrice((const Orders *) a, n, CompSummPrice);
+                printf("Summarized paid but not done price: %.2lf$\n", summ_price);
                 break;
             case 6:
-                printf("Total duration of unpaid orders = %.2lf\n\n", SummTime(a, n, CompSummTime));
+                summ_time = SummTime((const Orders *) a, n, CompSummTime);
+                printf("Summarized unpaid time: %.2lf minutes\n", summ_time);
                 break;
             case 7:
-                SearchName(a, name_company_search, n, CompSearch);
+                SearchName((const Orders *) a, name, n, CompSearch);
                 break;
             case 8:
-                printf("Sorting by date:\n\n");
-                DataSort(a, n, CompData);
-                PrintOrdersArray(a, n);
+                DataSort((Orders *) a, n, CompData);
+                printf("Orders sorted by date.\n");
                 break;
             case 9:
-                printf("The number of orders in the list: %d\n", n);
-				printf("Number of order: ");
-                if (scanf("%d", &i) != 1 || !(i > 0 && i <= n)) {
-                	printf("Not in array\n");
-                	break;
-				}
-                else
-                	DeleteOrder(a, &n, i - 1);
+                printf("Enter order number to delete (1-%d): ", n);
+                scanf("%d", &pos);
+                DeleteOrder((Orders **) &a, &n, pos - 1);
                 break;
             case 10:
-                DeleteAllOrders(a, &n);
+                DeleteAllOrders((Orders **) &a, &n);
+                printf("All orders deleted.\n");
                 break;
             case 11:
-                SaveOrdersToFile(a, n);
+                SaveOrdersToFile((const Orders *) a, n);
+                printf("Data saved to file.\n");
                 break;
             case 12:
-                LoadOrdersFromFile(a, &n);
+                LoadOrdersFromFile((Orders **) &a, &n);  // Распределение памяти
+                printf("Data loaded from file.\n");
                 break;
             case 13:
                 DestroyFileData();
+                printf("Data in file deleted.\n");
                 break;
             case -1:
-                system("pause");
+                free(a);
+                printf("Exiting...\n");
                 return 0;
+            default:
+                printf("Invalid choice, try again.\n");
         }
-        while (printf("Select an action:\n\t1 - Inserting an order\n\t2 - Adding orders\n\t3 - Print order (need number)\n\t4 - Print all orders\n\t5 - Print cost of unfulfilled and paid orders\n\t6 - Print total duration of unpaid orders\n\t7 - Search by name\n\t8 - Sorting by date\n\t9 - Delete order (need number)\n\t10 - Delete all orders\n\t11 - Save data if file\n\t12 - Load data from file\n\t13 - Delete data in file\n\t-1 - Exit\n"),
-                fflush(stdin),
-                scanf("%d", &k) != 1 || !(k >= -1 && k < 14 ))
-            printf("Error! Pls, try again\n");
     }
 }
